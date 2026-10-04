@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevTask Enterprise – Issue Tracker & Sprint Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 flex h-screen overflow-hidden font-sans antialiased">
+
+  <!-- Sidebar Navigation -->
+  <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between shrink-0">
+    <div>
+      <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/20">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <span class="font-bold text-lg tracking-wide text-white">DevTask <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/30">PRO</span></span>
+      </div>
+
+      <nav class="p-4 space-y-1.5" id="navLinks">
+        <a href="#board" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white" data-route="board">
+          <i class="fa-solid fa-table-columns w-5 text-center"></i> Kanban Board
+        </a>
+        <a href="#backlog" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white" data-route="backlog">
+          <i class="fa-solid fa-list-check w-5 text-center"></i> Backlog & List
+        </a>
+        <a href="#analytics" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white" data-route="analytics">
+          <i class="fa-solid fa-chart-pie w-5 text-center"></i> Analytics & Velocity
+        </a>
+      </nav>
+    </div>
+
+    <!-- Quick Metrics & Workspace Info -->
+    <div class="p-4 border-t border-slate-800 bg-slate-950/60">
+      <div class="text-xs uppercase text-slate-500 font-semibold mb-2 tracking-wider">Storage Sync</div>
+      <div class="flex items-center justify-between text-xs text-slate-400 mb-3">
+        <span>Status</span>
+        <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LocalStorage Active
+        </span>
+      </div>
+      <div class="flex gap-2">
+        <button id="exportBtn" class="flex-1 text-xs py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-medium transition text-center" title="Export as JSON">
+          <i class="fa-solid fa-download mr-1"></i> Export
+        </button>
+        <label class="flex-1 text-xs py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-medium transition text-center cursor-pointer">
+          <i class="fa-solid fa-upload mr-1"></i> Import
+          <input type="file" id="importInput" class="hidden" accept=".json" />
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Top Header -->
+    <header class="h-16 bg-slate-950/40 border-b border-slate-800 flex items-center justify-between px-8">
+      <div class="flex items-center gap-4 flex-1">
+        <div class="relative w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+          <input 
+            type="text" 
+            id="globalSearch" 
+            placeholder="Search tickets, tags, assignees..." 
+            class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-9 pr-4 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+          />
+        </div>
+        <select id="priorityFilter" class="bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500">
+          <option value="ALL">All Priorities</option>
+          <option value="Critical">Critical</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="openCreateModal" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm shadow-indigo-600/30 flex items-center gap-2 transition">
+          <i class="fa-solid fa-plus text-xs"></i> Create Issue
+        </button>
+      </div>
+    </header>
+
+    <!-- Dynamic Routed Content Container -->
+    <main id="appView" class="flex-1 overflow-y-auto p-8 bg-slate-900/50">
+      <!-- Views will be dynamically injected here by router.js -->
+    </main>
+  </div>
+
+  <!-- Create / Edit Issue Modal -->
+  <div id="issueModal" class="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-xl shadow-2xl p-6 relative">
+      <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
+        <h3 id="modalTitle" class="text-lg font-bold text-white">Create New Task</h3>
+        <button id="closeModal" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form id="issueForm" class="space-y-4">
+        <input type="hidden" id="editIssueId" value="" />
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1.5">Title</label>
+          <input type="text" id="formTitle" required placeholder="e.g., Optimize PostgreSQL connection pool" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1.5">Description</label>
+          <textarea id="formDescription" rows="3" placeholder="Provide technical details, reproduction steps..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1.5">Priority</label>
+            <select id="formPriority" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1.5">Initial Status</label>
+            <select id="formStatus" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">Code Review</option>
+              <option value="done">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1.5">Tags (Comma-separated)</label>
+          <input type="text" id="formTags" placeholder="Frontend, API, Performance" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+        <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
+          <button type="button" id="cancelModal" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

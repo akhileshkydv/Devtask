@@ -1,0 +1,26 @@
+/* Drag and Drop Visual Feedback */
+.kanban-drop-zone.drag-over {
+    background-color: rgba(79, 70, 229, 0.12) !important;
+    border-color: #6366f1 !important;
+  }
+  
+  .dragging {
+    opacity: 0.45;
+    transform: rotate(2deg) scale(0.98);
+  }
+  
+  /* Custom Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
